@@ -12,7 +12,6 @@ mtex,mtey=io.current_w,io.current_h #on assigne à mtex et mtey la taille actuel
 tex,tey=int(btex/btx*mtex),int(btey/bty*mtey) #avec les données ci-dessus on calcule la taille de la fenetre du jeu pour qu'elle soit adaptée à l'écran de l'utilisateur
 
 
-
 fenetre=pygame.display.set_mode([tex,tey])
 pygame.display.set_caption("runner")
 pygame.key.set_repeat(40,30)
@@ -29,7 +28,7 @@ tpanims=[["p1-1.png","p1-2.png","p1-3.png","p1-4.png","p1-5.png","p1-6.png","p1-
 imgsbackgrounds=["bg1.png"]
 imgcoeur=pygame.transform.scale(pygame.image.load(dimgs+"coeur.png"),[rx(25),ry(25)])
 
-tpobs=[["baril","o1.png",34,47,True]]
+tpobs=[["baril","o1.png",rx(34),ry(47),True]]
 #0=nom , 1=img , 2=tx , 3=ty , 4=kill(True or False)
 
 class Obstacle:
@@ -64,7 +63,7 @@ class Perso:
         self.dan=time.time()
         self.tan=0.1
         self.vie=3
-        self.tpinv=0
+        self.tpinv=3
         self.dinv=time.time()
         self.dclign=time.time()
         self.tclign=0.2
@@ -111,23 +110,24 @@ def gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv):
                 if p.vie>0 and p.tpinv<=0 and o.rect.colliderect(p.rect):
                     p.vie-=1
                     p.tpinv=3
+                    p.dinv=time.time()
                     p.px,p.py=random.randint(p.tx,tex-p.tx),random.randint(p.ty,tey-p.ty)
                     p.score-=1000
                     if p.vie<=0:
                         p.tfin=time.time()
                     o.delete=True
-            o.px-=vit
+            o.px-=rx(vit)
             if o.px+o.tx <= 0:
                 o.delete=True
         for o in obstacles:
             if o.delete:
                 if o in obstacles : del(obstacles[obstacles.index(o)])
-        bgx1-=vit
-        bgx2-=vit
-        if bgx1<=-tex: bgx1=tex-vit
-        if bgx2<=-tex: bgx2=tex-vit
+        bgx1-=rx(vit)
+        bgx2-=rx(vit)
+        if bgx1<=-tex: bgx1=tex-rx(vit)
+        if bgx2<=-tex: bgx2=tex-rx(vit)
         for p in persos:
-            if p.vie>0: p.score+=vit
+            if p.vie>0: p.score+=rx(vit)
     if time.time()-davit >= tavit:
         if vit<50: vit+=0.5
         davit=time.time()
