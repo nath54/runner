@@ -1,4 +1,8 @@
 
 There are images that have been taken on the site opengameart.org, thank you to all creators who put online content creative common : 
     -https://opengameart.org/content/pixel-run
+    -https://opengameart.org/content/heart-3
+    -https://opengameart.org/content/punk-run-animation
+    -https://opengameart.org/content/runner-character
+    -https://opengameart.org/content/running-caveman-spritesheet
 
