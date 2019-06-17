@@ -168,11 +168,10 @@ def verif_keys(persos):
 
 def bot(p,obs,vit):
     if True:
-        """
         lstmov=["up","down","left","right"]
         if p.dmov!=None :
             for x in range(10): lstmov.append(p.dmov)
-        p.bouger(random.choice(lstmov))"""
+        p.bouger(random.choice(lstmov))
         for o in obs:
             if o.kill:
                 ofr=pygame.Rect(0,o.py,tex,o.ty)
