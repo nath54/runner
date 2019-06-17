@@ -25,6 +25,18 @@ font2=pygame.font.SysFont("Serif",ry(22))
 dimgs="images/"
 tpanims=[["p1-1.png","p1-2.png","p1-3.png","p1-4.png","p1-5.png","p1-6.png","p1-7.png","p1-8.png"],["p2-1.png","p2-2.png","p2-3.png","p2-4.png","p2-5.png","p2-6.png","p2-7.png","p2-8.png"],["p3-1.png","p3-2.png","p3-3.png","p3-4.png","p3-5.png","p3-6.png","p3-7.png","p3-8.png"],["p4-1.png","p4-2.png","p4-3.png","p4-4.png","p4-5.png","p4-6.png","p4-7.png","p4-8.png","p4-9.png","p4-10.png","p4-11.png","p4-12.png","p4-13.png","p4-14.png","p4-15.png","p4-16.png"]]
 
+animspersos=[]
+
+for an in tpanims:
+    animspersos.append([])
+    for im in an: animspersos[tpanims.index(an)].append( pygame.transform.scale(pygame.image.load(dimgs+im),[rx(75),ry(75)]) )
+
+imgrandommenu=pygame.transform.scale(pygame.image.load(dimgs+"random.png"),[rx(75),ry(75)])
+imgkp1=pygame.transform.scale(pygame.image.load(dimgs+"keysp1.png"),[rx(125),ry(80)])
+imgkp2=pygame.transform.scale(pygame.image.load(dimgs+"keysp2.png"),[rx(125),ry(80)])
+imgkp3=pygame.transform.scale(pygame.image.load(dimgs+"keysp3.png"),[rx(125),ry(80)])
+imgkp4=pygame.transform.scale(pygame.image.load(dimgs+"keysp4.png"),[rx(125),ry(80)])
+
 imgsbackgrounds=["bg1.png"]
 imgcoeur=pygame.transform.scale(pygame.image.load(dimgs+"coeur.png"),[rx(25),ry(25)])
 
@@ -167,7 +179,7 @@ def aff(persos,obstacles,fps,imgbg1,imgbg2,bgx1,bgx2,vit,nbobs):
     fenetre.blit(font.render("fps : "+str(fps),20,(255,255,255)),[rx(15),ry(15)])
     pygame.display.update()
 
-def main_jeu():
+def main_jeu(p1,p2,p3,p4):
     imgbg1=pygame.transform.scale(pygame.image.load(dimgs+random.choice(imgsbackgrounds)),[tex+100,tey])
     imgbg2=pygame.transform.scale(pygame.image.load(dimgs+random.choice(imgsbackgrounds)),[tex+100,tey])
     bgx1=0
@@ -181,10 +193,14 @@ def main_jeu():
     tavit=10.0
     tno=5
     dno=time.time()
-    persos.append( Perso("player1",random.randint(0,len(tpanims)-1),[K_UP,K_DOWN,K_LEFT,K_RIGHT]) )
-    persos.append( Perso("player2",random.randint(0,len(tpanims)-1),[K_i,K_k,K_j,K_l]) )
-    persos.append( Perso("player3",random.randint(0,len(tpanims)-1),[K_e,K_d,K_s,K_f]) )
-    persos.append( Perso("player4",random.randint(0,len(tpanims)-1),[K_KP8,K_KP2,K_KP4,K_KP6]) )
+    if p1[0]==-1: p1[0]=random.randint(0,len(tpanims)-1)
+    if p2[0]==-1: p2[0]=random.randint(0,len(tpanims)-1)
+    if p3[0]==-1: p3[0]=random.randint(0,len(tpanims)-1)
+    if p4[0]==-1: p4[0]=random.randint(0,len(tpanims)-1)    
+    if p1[0]!=None : persos.append( Perso(p1[1],p1[0],p1[2]) )
+    if p2[0]!=None : persos.append( Perso(p2[1],p2[0],p2[2]) )
+    if p3[0]!=None : persos.append( Perso(p3[1],p3[0],p3[2]) )
+    if p4[0]!=None : persos.append( Perso(p4[1],p4[0],p4[2]) )
     encour=True
     nbviv=len(persos)
     perdu=False
@@ -236,8 +252,149 @@ def main_jeu():
                 elif event.type==KEYDOWN:
                     if event.key==K_ESCAPE: encoure=False
                     elif event.key==K_SPACE: encoure=False
-                    
-        
-main_jeu()
 
-                
+def aff_menu(p1,p2,p3,p4,fps):
+    fenetre.fill((0,0,0))
+    bts=[]
+    for x in range(9): bts.append(None)
+    #p1
+    p1x,p1y=75,75
+    bts[1]=pygame.draw.rect(fenetre,(90,90,90),(rx(p1x),ry(p1y),rx(75),ry(75)),0)
+    if p1[0]!=None:
+        if p1[0]!=-1: fenetre.blit(animspersos[p1[0]][p1[4]],[rx(p1x),ry(p1y)])
+        else: fenetre.blit(imgrandommenu,[rx(p1x),ry(p1y)])
+        fenetre.blit(font2.render(p1[1],20,(255,255,255)),[rx(p1x),ry(p1y-30)])
+        bts[2]=pygame.draw.rect(fenetre,(0,20,120),(rx(p1x-20),ry(p1y+120),rx(100),ry(35)),0)
+        if p1[3]==0: p1txt=font.render("bot",20,(255,255,255))
+        else: p1txt=font.render("human",20,(255,255,255))
+        fenetre.blit( p1txt , [rx(p1x),ry(p1y+125)] )
+        fenetre.blit( imgkp1 , [rx(p1x-50),ry(p1y+200)] )
+    else: fenetre.blit( font.render("None",20,(250,250,250)) , [rx(p1x+15),ry(p1y)+30] )
+    #p2
+    p2x,p2y=75+150,75
+    bts[3]=pygame.draw.rect(fenetre,(90,90,90),(rx(p2x),ry(p2y),rx(75),ry(75)),0)
+    if p2[0]!=None:
+        if p2[0]!=-1: fenetre.blit(animspersos[p2[0]][p2[4]],[rx(p2x),ry(p2y)])
+        else: fenetre.blit(imgrandommenu,[rx(p2x),ry(p2y)])
+        fenetre.blit(font2.render(p2[1],20,(255,255,255)),[rx(p2x),ry(p2y-30)])
+        bts[4]=pygame.draw.rect(fenetre,(0,20,120),(rx(p2x-20),ry(p2y+120),rx(100),ry(35)),0)
+        if p2[3]==0: p2txt=font.render("bot",20,(255,255,255))
+        else: p2txt=font.render("human",20,(255,255,255))
+        fenetre.blit( p2txt , [rx(p2x),ry(p2y+125)] )
+        fenetre.blit( imgkp2 , [rx(p2x-50),ry(p2y+200)] )
+    else: fenetre.blit( font.render("None",20,(250,250,250)) , [rx(p2x+15),ry(p2y)+30] )
+    #p2
+    p3x,p3y=75+300,75
+    bts[5]=pygame.draw.rect(fenetre,(90,90,90),(rx(p3x),ry(p3y),rx(75),ry(75)),0)
+    if p3[0]!=None:
+        if p3[0]!=-1: fenetre.blit(animspersos[p3[0]][p3[4]],[rx(p3x),ry(p3y)])
+        else: fenetre.blit(imgrandommenu,[rx(p3x),ry(p3y)])
+        fenetre.blit(font2.render(p3[1],20,(255,255,255)),[rx(p3x),ry(p3y-30)])
+        bts[6]=pygame.draw.rect(fenetre,(0,20,120),(rx(p3x-20),ry(p3y+120),rx(100),ry(35)),0)
+        if p3[3]==0: p3txt=font.render("bot",20,(255,255,255))
+        else: p3txt=font.render("human",20,(255,255,255))
+        fenetre.blit( p3txt , [rx(p3x),ry(p3y+125)] )
+        fenetre.blit( imgkp3 , [rx(p3x-50),ry(p3y+200)] )
+    else: fenetre.blit( font.render("None",20,(250,250,250)) , [rx(p3x+15),ry(p3y)+30] )
+    #p4
+    p4x,p4y=75+450,75
+    bts[7]=pygame.draw.rect(fenetre,(90,90,90),(rx(p4x),ry(p4y),rx(75),ry(75)),0)
+    if p4[0]!=None:
+        if p4[0]!=-1: fenetre.blit(animspersos[p4[0]][p4[4]],[rx(p4x),ry(p4y)])
+        else: fenetre.blit(imgrandommenu,[rx(p4x),ry(p4y)])
+        fenetre.blit(font2.render(p4[1],20,(255,255,255)),[rx(p4x),ry(p4y-30)])
+        bts[8]=pygame.draw.rect(fenetre,(0,20,120),(rx(p4x-20),ry(p4y+120),rx(100),ry(35)),0)
+        if p4[3]==0: p4txt=font.render("bot",20,(255,255,255))
+        else: p4txt=font.render("human",20,(255,255,255))
+        fenetre.blit( p4txt , [rx(p4x),ry(p4y+125)] )
+        fenetre.blit( imgkp4 , [rx(p4x-50),ry(p4y+200)] )
+    else: fenetre.blit( font.render("None",20,(250,250,250)) , [rx(p4x+15),ry(p4y)+30] )
+    #0
+    bts[0]=pygame.draw.rect(fenetre,(151,150,0),(rx(285),ry(400),rx(150),ry(75)),0)
+    fenetre.blit( font.render("Play !",20,(0,0,0)) , [rx(325),ry(410)] )
+    fenetre.blit( font2.render("Runner",20,(250,0,0)) , [rx(325),ry(5)] )
+    fenetre.blit( font.render("fps : "+str(fps),20,(255,255,255)) ,[rx(10),ry(10)] )
+    pygame.display.update()
+    return bts
+
+def main_menu():
+    tpan=0.05
+    dani=time.time()
+    p1=[None,"player1",[K_UP,K_DOWN,K_LEFT,K_RIGHT],1,0]
+    p2=[None,"player2",[K_e,K_d,K_s,K_f],1,0]
+    p3=[None,"player3",[K_i,K_k,K_j,K_l],1,0]
+    p4=[None,"player4",[K_KP5,K_KP2,K_KP1,K_KP3],1,0]
+    #0=tp , 1=nom , 2=keys , 3=bot(0)/human(1) , 4=etape anim perso menu
+    bts=[]
+    fps=0
+    encoure=True
+    while encoure:
+        t1=time.time()
+        #
+        if time.time()-dani>=tpan:
+            dani=time.time()
+            if p1[0]!=None:
+                p1[4]+=1
+                if p1[4]>=len(animspersos[p1[0]]): p1[4]=0
+            if p2[0]!=None:
+                p2[4]+=1
+                if p2[4]>=len(animspersos[p2[0]]): p2[4]=0
+            if p3[0]!=None:
+                p3[4]+=1
+                if p3[4]>=len(animspersos[p3[0]]): p3[4]=0
+            if p4[0]!=None:
+                p4[4]+=1
+                if p4[4]>=len(animspersos[p4[0]]): p4[4]=0
+        #
+        bts=aff_menu(p1,p2,p3,p4,fps)
+        #
+        for event in pygame.event.get():
+            if event.type==QUIT: exit()
+            elif event.type==KEYDOWN:
+                if event.key==K_ESCAPE: encoure=False
+            elif event.type==MOUSEBUTTONDOWN:
+                pos=pygame.mouse.get_pos()
+                for b in bts:
+                    if b != None and b.collidepoint(pos):
+                        di=bts.index(b)
+                        if di==0: main_jeu(p1,p2,p3,p4)
+                        elif di==1:
+                            if p1[0]==None: p1[0]=-1
+                            else: p1[0]+=1
+                            if p1[0]>=len(tpanims): p1[0]=None
+                            p1[4]=0
+                        elif di==2:
+                            if p1[3]==0: p1[3]=1
+                            else: p1[3]=0
+                        elif di==3:
+                            if p2[0]==None: p2[0]=-1
+                            else: p2[0]+=1
+                            if p2[0]>=len(tpanims): p2[0]=None
+                            p2[4]=0
+                        elif di==4:
+                            if p2[3]==0: p2[3]=1
+                            else: p2[3]=0
+                        elif di==5:
+                            if p3[0]==None: p3[0]=-1
+                            else: p3[0]+=1
+                            if p3[0]>=len(tpanims): p3[0]=None
+                            p3[4]=0
+                        elif di==6:
+                            if p3[3]==0: p3[3]=1
+                            else: p3[3]=0
+                        elif di==7:
+                            if p4[0]==None: p4[0]=-1
+                            else: p4[0]+=1
+                            if p4[0]>=len(tpanims): p4[0]=None
+                            p4[4]=0
+                        elif di==8:
+                            if p4[3]==0: p4[3]=1
+                            else: p4[3]=0
+        t2=time.time()
+        tt=(t2-t1)
+        if tt!=0: fps=int(1./tt)
+                        
+ 
+main_menu()
+
+
