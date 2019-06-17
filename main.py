@@ -23,7 +23,7 @@ font=pygame.font.SysFont("Serif",ry(15))
 font2=pygame.font.SysFont("Serif",ry(22))
 
 dimgs="images/"
-tpanims=[["p1-1.png","p1-2.png","p1-3.png","p1-4.png","p1-5.png","p1-6.png","p1-7.png","p1-8.png"],["p2-1.png","p2-2.png","p2-3.png","p2-4.png","p2-5.png","p2-6.png","p2-7.png","p2-8.png"],["p3-1.png","p3-2.png","p3-3.png","p3-4.png","p3-5.png","p3-6.png","p3-7.png","p3-8.png"],["p4-1.png","p4-2.png","p4-3.png","p4-4.png","p4-5.png","p4-6.png","p4-7.png","p4-8.png","p4-9.png","p4-10.png","p4-11.png","p4-12.png","p4-13.png","p4-14.png","p4-15.png","p4-16.png"]]
+tpanims=[["p1-1.png","p1-2.png","p1-3.png","p1-4.png","p1-5.png","p1-6.png","p1-7.png","p1-8.png"],["p2-1.png","p2-2.png","p2-3.png","p2-4.png","p2-5.png","p2-6.png","p2-7.png","p2-8.png"],["p3-1.png","p3-2.png","p3-3.png","p3-4.png","p3-5.png","p3-6.png","p3-7.png","p3-8.png"],["p4-1.png","p4-2.png","p4-3.png","p4-4.png","p4-5.png","p4-6.png","p4-7.png","p4-8.png","p4-9.png","p4-10.png","p4-11.png","p4-12.png","p4-13.png","p4-14.png","p4-15.png","p4-16.png"],["p5-1.png","p5-2.png","p5-3.png","p5-4.png","p5-5.png","p5-6.png","p5-7.png","p5-8.png"]]
 
 animspersos=[]
 
@@ -40,7 +40,7 @@ imgkp4=pygame.transform.scale(pygame.image.load(dimgs+"keysp4.png"),[rx(125),ry(
 imgsbackgrounds=["bg1.png"]
 imgcoeur=pygame.transform.scale(pygame.image.load(dimgs+"coeur.png"),[rx(25),ry(25)])
 
-tpobs=[["baril","o1.png",rx(34),ry(47),True]]
+tpobs=[["baril","o1.png",rx(34),ry(47),True],["plant1","o2.png",rx(81),ry(57),False],["plant2","o3.png",rx(38),ry(26),False]]
 #0=nom , 1=img , 2=tx , 3=ty , 4=kill(True or False)
 
 class Obstacle:
@@ -73,7 +73,6 @@ class Perso:
         self.an=0
         self.img=self.imgs[self.an]
         self.dan=time.time()
-        self.tan=0.1
         self.vie=3
         self.tpinv=3
         self.dinv=time.time()
@@ -100,8 +99,8 @@ class Perso:
             elif aa=="right":
                 self.px+=self.vit
                 if self.px > tex-self.tx: self.px=tex-self.tx
-    def anim(self):
-        if time.time()-self.dan >= self.tan:
+    def anim(self,tpan):
+        if time.time()-self.dan >= tpan:
             self.dan=time.time()
             self.an+=1
             if self.an>=len(self.imgs): self.an=0
@@ -113,13 +112,13 @@ class Perso:
             self.tpinv-=time.time()-self.dinv
             self.dinv=time.time()
 
-def gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv):
+def gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv,tpan):
     while len(obstacles)<nbobs: obstacles.append( Obstacle(random.randint(tex,tex*2),random.randint(0,tey),random.randint(0,len(tpobs)-1)) )
     if time.time()-dmv>=tmv:
         dmv=time.time()
         for o in obstacles:
             for p in persos:
-                if p.vie>0 and p.tpinv<=0 and o.rect.colliderect(p.rect):
+                if o.kill and p.vie>0 and p.tpinv<=0 and o.rect.colliderect(p.rect):
                     p.vie-=1
                     p.tpinv=3
                     p.dinv=time.time()
@@ -144,10 +143,11 @@ def gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv):
         if vit<50: vit+=0.5
         davit=time.time()
         if tavit > 1 : tavit-=0.05
+        if tpan > 0.01: tpan-=0.001
     if time.time()-dno>=tno and nbobs<15:
         dno=time.time()
         nbobs+=1
-    return tavit,davit,bgx1,bgx2,obstacles,vit,persos,tno,dno,nbobs,dmv
+    return tavit,davit,bgx1,bgx2,obstacles,vit,persos,tno,dno,nbobs,dmv,tpan
 
 def verif_keys(persos):
     keys=pygame.key.get_pressed()
@@ -192,6 +192,7 @@ def main_jeu(p1,p2,p3,p4):
     davit=time.time()
     tavit=10.0
     tno=5
+    tpan=0.1
     dno=time.time()
     if p1[0]==-1: p1[0]=random.randint(0,len(tpanims)-1)
     if p2[0]==-1: p2[0]=random.randint(0,len(tpanims)-1)
@@ -209,9 +210,9 @@ def main_jeu(p1,p2,p3,p4):
     while encour:
         t1=time.time()
         for p in persos:
-            if p.vie>0: p.anim()
+            if p.vie>0: p.anim(tpan)
         verif_keys(persos)
-        tavit,davit,bgx1,bgx2,obstacles,vit,persos,tno,dno,nbobs,dmv=gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv)
+        tavit,davit,bgx1,bgx2,obstacles,vit,persos,tno,dno,nbobs,dmv,tpan=gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv,tpan)
         aff(persos,obstacles,fps,imgbg1,imgbg2,bgx1,bgx2,vit,nbobs)
         for event in pygame.event.get():
             if event.type==QUIT: exit()
@@ -318,7 +319,7 @@ def aff_menu(p1,p2,p3,p4,fps):
     return bts
 
 def main_menu():
-    tpan=0.05
+    tpan=0.1
     dani=time.time()
     p1=[None,"player1",[K_UP,K_DOWN,K_LEFT,K_RIGHT],1,0]
     p2=[None,"player2",[K_e,K_d,K_s,K_f],1,0]
