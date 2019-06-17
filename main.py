@@ -56,7 +56,7 @@ class Obstacle:
         self.delete=False
 
 class Perso:
-    def __init__(self,nom,tpi,ks):
+    def __init__(self,nom,tpi,ks,bot):
         self.nom=nom
         self.tx,self.ty=rx(100),ry(100)
         self.px=random.randint(self.tx,tex-self.tx)
@@ -80,23 +80,31 @@ class Perso:
         self.tclign=0.2
         self.isclign=False
         self.cl=(random.randint(0,255),random.randint(0,255),random.randint(0,255))
-        self.rect=pygame.Rect(self.px,self.py,self.tx,self.ty)
+        self.rect=pygame.Rect(self.px,self.py+self.ty/2,self.tx,self.ty/2)
         self.score=0
         self.tdeb=time.time()
         self.tfin=0
+        self.bot=bot
+        self.dbouger=time.time()
+        self.tbouger=0.05
+        self.dmov=None
     def bouger(self,aa):
         if time.time()-self.db >= self.tb:
             self.db=time.time()
             if aa=="up":
+                self.dmov=aa
                 self.py-=self.vit
                 if self.py < 0: self.py=0
             elif aa=="down":
+                self.dmov=aa
                 self.py+=self.vit
                 if self.py > tey-self.ty: self.py=tey-self.ty
             elif aa=="left":
+                self.dmov=aa
                 self.px-=self.vit
                 if self.px < 0: self.px=0
             elif aa=="right":
+                self.dmov=aa
                 self.px+=self.vit
                 if self.px > tex-self.tx: self.px=tex-self.tx
     def anim(self,tpan):
@@ -118,7 +126,7 @@ def gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv,tp
         dmv=time.time()
         for o in obstacles:
             for p in persos:
-                if o.kill and p.vie>0 and p.tpinv<=0 and o.rect.colliderect(p.rect):
+                if o.kill and p.vie>0 and p.tpinv<=0 and o.rect.colliderect(pygame.Rect(p.px,p.py+p.ty/2,p.tx,p.ty/2)):
                     p.vie-=1
                     p.tpinv=3
                     p.dinv=time.time()
@@ -152,11 +160,27 @@ def gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv,tp
 def verif_keys(persos):
     keys=pygame.key.get_pressed()
     for p in persos:
-        if keys[p.keyup]:  p.bouger("up")
-        if keys[p.keydown]:  p.bouger("down")
-        if keys[p.keyleft]:  p.bouger("left")
-        if keys[p.keyright]:  p.bouger("right")
-    
+        if not p.bot:
+            if keys[p.keyup]:  p.bouger("up")
+            if keys[p.keydown]:  p.bouger("down")
+            if keys[p.keyleft]:  p.bouger("left")
+            if keys[p.keyright]:  p.bouger("right")
+
+def bot(p,obs,vit):
+    if True:
+        """
+        lstmov=["up","down","left","right"]
+        if p.dmov!=None :
+            for x in range(10): lstmov.append(p.dmov)
+        p.bouger(random.choice(lstmov))"""
+        for o in obs:
+            if o.kill:
+                ofr=pygame.Rect(0,o.py,tex,o.ty)
+                if ofr.colliderect(pygame.Rect(p.px,p.py+p.ty,p.tx,p.ty)):
+                    direc=random.choice(["up","down"])
+                    p.bouger(random.choice([direc]))
+            
+
 def aff(persos,obstacles,fps,imgbg1,imgbg2,bgx1,bgx2,vit,nbobs):
     fenetre.fill((0,0,0))
     fenetre.blit(imgbg1,[bgx1,0])
@@ -198,10 +222,10 @@ def main_jeu(p1,p2,p3,p4):
     if p2[0]==-1: p2[0]=random.randint(0,len(tpanims)-1)
     if p3[0]==-1: p3[0]=random.randint(0,len(tpanims)-1)
     if p4[0]==-1: p4[0]=random.randint(0,len(tpanims)-1)    
-    if p1[0]!=None : persos.append( Perso(p1[1],p1[0],p1[2]) )
-    if p2[0]!=None : persos.append( Perso(p2[1],p2[0],p2[2]) )
-    if p3[0]!=None : persos.append( Perso(p3[1],p3[0],p3[2]) )
-    if p4[0]!=None : persos.append( Perso(p4[1],p4[0],p4[2]) )
+    if p1[0]!=None : persos.append( Perso(p1[1],p1[0],p1[2],p1[3]) )
+    if p2[0]!=None : persos.append( Perso(p2[1],p2[0],p2[2],p2[3]) )
+    if p3[0]!=None : persos.append( Perso(p3[1],p3[0],p3[2],p3[3]) )
+    if p4[0]!=None : persos.append( Perso(p4[1],p4[0],p4[2],p4[3]) )
     encour=True
     nbviv=len(persos)
     perdu=False
@@ -211,6 +235,7 @@ def main_jeu(p1,p2,p3,p4):
         t1=time.time()
         for p in persos:
             if p.vie>0: p.anim(tpan)
+            if p.bot: bot(p,obstacles,vit)
         verif_keys(persos)
         tavit,davit,bgx1,bgx2,obstacles,vit,persos,tno,dno,nbobs,dmv,tpan=gameloop(obstacles,bgx1,bgx2,vit,nbobs,davit,tavit,persos,tno,dno,tmv,dmv,tpan)
         aff(persos,obstacles,fps,imgbg1,imgbg2,bgx1,bgx2,vit,nbobs)
@@ -266,7 +291,7 @@ def aff_menu(p1,p2,p3,p4,fps):
         else: fenetre.blit(imgrandommenu,[rx(p1x),ry(p1y)])
         fenetre.blit(font2.render(p1[1],20,(255,255,255)),[rx(p1x),ry(p1y-30)])
         bts[2]=pygame.draw.rect(fenetre,(0,20,120),(rx(p1x-20),ry(p1y+120),rx(100),ry(35)),0)
-        if p1[3]==0: p1txt=font.render("bot",20,(255,255,255))
+        if p1[3]: p1txt=font.render("bot",20,(255,255,255))
         else: p1txt=font.render("human",20,(255,255,255))
         fenetre.blit( p1txt , [rx(p1x),ry(p1y+125)] )
         fenetre.blit( imgkp1 , [rx(p1x-50),ry(p1y+200)] )
@@ -279,7 +304,7 @@ def aff_menu(p1,p2,p3,p4,fps):
         else: fenetre.blit(imgrandommenu,[rx(p2x),ry(p2y)])
         fenetre.blit(font2.render(p2[1],20,(255,255,255)),[rx(p2x),ry(p2y-30)])
         bts[4]=pygame.draw.rect(fenetre,(0,20,120),(rx(p2x-20),ry(p2y+120),rx(100),ry(35)),0)
-        if p2[3]==0: p2txt=font.render("bot",20,(255,255,255))
+        if p2[3]: p2txt=font.render("bot",20,(255,255,255))
         else: p2txt=font.render("human",20,(255,255,255))
         fenetre.blit( p2txt , [rx(p2x),ry(p2y+125)] )
         fenetre.blit( imgkp2 , [rx(p2x-50),ry(p2y+200)] )
@@ -292,7 +317,7 @@ def aff_menu(p1,p2,p3,p4,fps):
         else: fenetre.blit(imgrandommenu,[rx(p3x),ry(p3y)])
         fenetre.blit(font2.render(p3[1],20,(255,255,255)),[rx(p3x),ry(p3y-30)])
         bts[6]=pygame.draw.rect(fenetre,(0,20,120),(rx(p3x-20),ry(p3y+120),rx(100),ry(35)),0)
-        if p3[3]==0: p3txt=font.render("bot",20,(255,255,255))
+        if p3[3]: p3txt=font.render("bot",20,(255,255,255))
         else: p3txt=font.render("human",20,(255,255,255))
         fenetre.blit( p3txt , [rx(p3x),ry(p3y+125)] )
         fenetre.blit( imgkp3 , [rx(p3x-50),ry(p3y+200)] )
@@ -305,7 +330,7 @@ def aff_menu(p1,p2,p3,p4,fps):
         else: fenetre.blit(imgrandommenu,[rx(p4x),ry(p4y)])
         fenetre.blit(font2.render(p4[1],20,(255,255,255)),[rx(p4x),ry(p4y-30)])
         bts[8]=pygame.draw.rect(fenetre,(0,20,120),(rx(p4x-20),ry(p4y+120),rx(100),ry(35)),0)
-        if p4[3]==0: p4txt=font.render("bot",20,(255,255,255))
+        if p4[3]: p4txt=font.render("bot",20,(255,255,255))
         else: p4txt=font.render("human",20,(255,255,255))
         fenetre.blit( p4txt , [rx(p4x),ry(p4y+125)] )
         fenetre.blit( imgkp4 , [rx(p4x-50),ry(p4y+200)] )
@@ -321,10 +346,10 @@ def aff_menu(p1,p2,p3,p4,fps):
 def main_menu():
     tpan=0.1
     dani=time.time()
-    p1=[None,"player1",[K_UP,K_DOWN,K_LEFT,K_RIGHT],1,0]
-    p2=[None,"player2",[K_e,K_d,K_s,K_f],1,0]
-    p3=[None,"player3",[K_i,K_k,K_j,K_l],1,0]
-    p4=[None,"player4",[K_KP5,K_KP2,K_KP1,K_KP3],1,0]
+    p1=[None,"player1",[K_UP,K_DOWN,K_LEFT,K_RIGHT],False,0]
+    p2=[None,"player2",[K_e,K_d,K_s,K_f],False,0]
+    p3=[None,"player3",[K_i,K_k,K_j,K_l],False,0]
+    p4=[None,"player4",[K_KP5,K_KP2,K_KP1,K_KP3],False,0]
     #0=tp , 1=nom , 2=keys , 3=bot(0)/human(1) , 4=etape anim perso menu
     bts=[]
     fps=0
@@ -364,33 +389,25 @@ def main_menu():
                             else: p1[0]+=1
                             if p1[0]>=len(tpanims): p1[0]=None
                             p1[4]=0
-                        elif di==2:
-                            if p1[3]==0: p1[3]=1
-                            else: p1[3]=0
+                        elif di==2: p1[3]=not p1[3]
                         elif di==3:
                             if p2[0]==None: p2[0]=-1
                             else: p2[0]+=1
                             if p2[0]>=len(tpanims): p2[0]=None
                             p2[4]=0
-                        elif di==4:
-                            if p2[3]==0: p2[3]=1
-                            else: p2[3]=0
+                        elif di==4: p2[3]=not p2[3]
                         elif di==5:
                             if p3[0]==None: p3[0]=-1
                             else: p3[0]+=1
                             if p3[0]>=len(tpanims): p3[0]=None
                             p3[4]=0
-                        elif di==6:
-                            if p3[3]==0: p3[3]=1
-                            else: p3[3]=0
+                        elif di==6: p3[3]=not p3[3]
                         elif di==7:
                             if p4[0]==None: p4[0]=-1
                             else: p4[0]+=1
                             if p4[0]>=len(tpanims): p4[0]=None
                             p4[4]=0
-                        elif di==8:
-                            if p4[3]==0: p4[3]=1
-                            else: p4[3]=0
+                        elif di==8: p4[3]=not p4[3]
         t2=time.time()
         tt=(t2-t1)
         if tt!=0: fps=int(1./tt)
